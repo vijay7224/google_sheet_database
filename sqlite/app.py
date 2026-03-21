@@ -10,7 +10,8 @@ UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # MongoDB Connection
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient("mongodb+srv://vijaysuryawanshi7224_db_user:vijay%402005@cluster0.ckvnjfm.mongodb.net/collegedb?retryWrites=true&w=majority") 
+
 db = client["student_db"]
 collection = db["documents"]
 
