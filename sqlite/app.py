@@ -1,62 +1,58 @@
-from flask import Flask, request, render_template, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for
+from werkzeug.utils import secure_filename
+from pymongo import MongoClient
 import os
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+# Upload folder
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Google Sheet connection
-scope = [
-"https://spreadsheets.google.com/feeds",
-"https://www.googleapis.com/auth/drive"
-]
+# MongoDB Connection
+client = MongoClient("mongodb://localhost:27017/")
+db = client["student_db"]
+collection = db["documents"]
 
-creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
-client = gspread.authorize(creds)
+# Home Page
+@app.route('/')
+def index():
+    files = list(collection.find())
+    return render_template('index.html', files=files)
 
-sheet = client.open("user_database").sheet1
+# Upload Route
+@app.route('/upload', methods=['POST'])
+def upload():
+    if 'file' not in request.files:
+        return "No file"
 
+    file = request.files['file']
 
-@app.route("/")
-def home():
-    return render_template("form.html")
+    if file.filename == '':
+        return "No selected file"
 
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-@app.route("/submit", methods=["POST"])
-def submit():
+    file.save(filepath)
 
-    name = request.form["name"]
-    phone = request.form["phone"]
-    email = request.form["email"]
+    # Save to MongoDB
+    collection.insert_one({
+        "filename": filename
+    })
 
-    resume = request.files["resume"]
+    return redirect(url_for('index'))
 
-    filepath = os.path.join(app.config["UPLOAD_FOLDER"], resume.filename)
-    resume.save(filepath)
+# Delete File
+@app.route('/delete/<filename>')
+def delete(filename):
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-    sheet.append_row([name, phone, email, resume.filename])
+    if os.path.exists(filepath):
+        os.remove(filepath)
 
-    return f"""
-    <h2>Registration Successful</h2>
-    <p>Name: {name}</p>
-    <p>Email: {email}</p>
+    collection.delete_one({"filename": filename})
+    return redirect(url_for('index'))
 
-    <a href="/uploads/{resume.filename}" target="_blank">
-    <button style="padding:10px 20px;background:#28a745;color:white;border:none;border-radius:5px;">
-    View Resume
-    </button>
-    </a>
-    """
-
-
-@app.route("/uploads/<filename>")
-def uploaded_file(filename):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+if __name__ == '__main__':
+    app.run(debug=True)
