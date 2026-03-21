@@ -3,20 +3,31 @@
 <head>
     <title>Document Upload System</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<body class="bg-light">
+<body>
 
 <div class="container mt-5">
 
+    <h2 class="text-center mb-4">📂 Document Upload System</h2>
+
     <div class="row">
+
+        <!-- Upload Section -->
         <div class="col-md-6">
-            <div class="status-card p-4 shadow rounded bg-white">
-                <h5>📂 Upload Documents</h5>
+            <div class="card-box">
+
+                <h5>Upload Documents</h5>
                 <p class="text-muted">Upload marksheets & certificates</p>
 
                 <form action="/upload" method="POST" enctype="multipart/form-data">
@@ -26,25 +37,37 @@
                         <i class="fas fa-upload"></i> Upload
                     </button>
                 </form>
+
             </div>
         </div>
 
+        <!-- File List -->
         <div class="col-md-6">
-            <div class="status-card p-4 shadow rounded bg-white">
-                <h5>📄 Uploaded Files</h5>
+            <div class="card-box">
+
+                <h5>Uploaded Files</h5>
 
                 {% for file in files %}
-                <div class="d-flex justify-content-between align-items-center border p-2 mb-2 rounded">
+                <div class="file-item">
+
                     <span>{{ file.filename }}</span>
 
-                    <a href="/delete/{{ file.filename }}" class="btn btn-danger btn-sm">
-                        Delete
-                    </a>
+                    <div>
+                        <a href="/view/{{ file.filename }}" target="_blank" class="btn btn-success btn-sm">
+                            View
+                        </a>
+
+                        <a href="/delete/{{ file.filename }}" class="btn btn-danger btn-sm">
+                            Delete
+                        </a>
+                    </div>
+
                 </div>
                 {% endfor %}
 
             </div>
         </div>
+
     </div>
 
 </div>
