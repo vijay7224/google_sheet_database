@@ -1,0 +1,11 @@
+body {
+    font-family: Arial;
+}
+
+.status-card {
+    transition: 0.3s;
+}
+
+.status-card:hover {
+    transform: scale(1.02);
+}
