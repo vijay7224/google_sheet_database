@@ -43,7 +43,10 @@ def upload():
         return "❌ No file selected"
 
     try:
-        result = cloudinary.uploader.upload(file)
+        result = cloudinary.uploader.upload(
+            file,
+            resource_type="raw"
+        )
 
         file_url = result['secure_url']
         public_id = result['public_id']
