@@ -13,14 +13,18 @@ ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# ------------------------------
 # Cloudinary Config
+# ------------------------------
 cloudinary.config(
     cloud_name=os.getenv("CLOUD_NAME"),
     api_key=os.getenv("API_KEY"),
     api_secret=os.getenv("API_SECRET")
 )
 
+# ------------------------------
 # MongoDB Config
+# ------------------------------
 client = MongoClient("mongodb+srv://vijaysuryawanshi7224_db_user:vijay%402005@cluster0.ckvnjfm.mongodb.net/collegedb?retryWrites=true&w=majority") 
 
 db = client["student_db"]
@@ -48,23 +52,21 @@ def upload():
     ext = file.filename.rsplit('.', 1)[1].lower()
     resource_type = "raw" if ext == "pdf" else "image"
 
-    result = cloudinary.uploader.upload(file, resource_type=resource_type)
-
-    file_url = result['secure_url']
-    if ext == "pdf" and not file_url.endswith(".pdf"):
-        file_url += ".pdf"
-
-    collection.insert_one({
-        "filename": file.filename,
-        "url": file_url,
-        "public_id": result['public_id'],
-        "type": ext
-    })
+    try:
+        result = cloudinary.uploader.upload(file, resource_type=resource_type)
+        collection.insert_one({
+            "filename": file.filename,
+            "url": result['secure_url'],   # Use exact Cloudinary URL
+            "public_id": result['public_id'],
+            "type": ext
+        })
+    except Exception as e:
+        return f"Upload failed: {str(e)}"
 
     return redirect(url_for('index'))
 
 # ------------------------------
-# View File (PDF.js / Image)
+# View File
 # ------------------------------
 @app.route('/view/<id>')
 def view_file(id):
@@ -89,5 +91,5 @@ def delete(id):
 # Run App (Render-ready)
 # ------------------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))  # Render dynamic port
     app.run(host="0.0.0.0", port=port)
