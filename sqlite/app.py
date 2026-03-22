@@ -1,24 +1,29 @@
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
-from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, redirect, url_for
 from pymongo import MongoClient
+from bson.objectid import ObjectId
+import cloudinary
+import cloudinary.uploader
 import os
 
 app = Flask(__name__)
 
 # ==============================
-# 📁 Upload Folder
+# ☁️ Cloudinary Config
 # ==============================
-UPLOAD_FOLDER = 'uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+cloudinary.config(
+    cloud_name = os.getenv("CLOUD_NAME"),
+    api_key = os.getenv("API_KEY"),
+    api_secret = os.getenv("API_SECRET")
+)
 
 # ==============================
-# 🔐 MongoDB (Use ENV Variable in Render)
+# 🔐 MongoDB Config
 # ==============================
 client = MongoClient("mongodb+srv://vijaysuryawanshi7224_db_user:vijay%402005@cluster0.ckvnjfm.mongodb.net/collegedb?retryWrites=true&w=majority") 
 
 db = client["student_db"]
 collection = db["documents"]
+
 # ==============================
 # 🏠 Home Page
 # ==============================
@@ -28,51 +33,51 @@ def index():
     return render_template('index.html', files=files)
 
 # ==============================
-# 📤 Upload
+# 📤 Upload File (Cloudinary)
 # ==============================
 @app.route('/upload', methods=['POST'])
 def upload():
-    if 'file' not in request.files:
-        return "No file"
+    file = request.files.get('file')
 
-    file = request.files['file']
+    if not file or file.filename == '':
+        return "❌ No file selected"
 
-    if file.filename == '':
-        return "No selected file"
+    try:
+        result = cloudinary.uploader.upload(file)
 
-    filename = secure_filename(file.filename)
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file_url = result['secure_url']
+        public_id = result['public_id']
 
-    file.save(filepath)
+        collection.insert_one({
+            "filename": file.filename,
+            "url": file_url,
+            "public_id": public_id
+        })
 
-    collection.insert_one({
-        "filename": filename
-    })
+    except Exception as e:
+        return f"Upload failed: {str(e)}"
 
     return redirect(url_for('index'))
 
 # ==============================
-# 👁️ View File
+# ❌ Delete File (Cloudinary + DB)
 # ==============================
-@app.route('/view/<filename>')
-def view_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+@app.route('/delete/<id>')
+def delete(id):
+    try:
+        file = collection.find_one({"_id": ObjectId(id)})
 
-# ==============================
-# ❌ Delete
-# ==============================
-@app.route('/delete/<filename>')
-def delete(filename):
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if file:
+            cloudinary.uploader.destroy(file['public_id'])
+            collection.delete_one({"_id": ObjectId(id)})
 
-    if os.path.exists(filepath):
-        os.remove(filepath)
+    except Exception as e:
+        return f"Delete failed: {str(e)}"
 
-    collection.delete_one({"filename": filename})
     return redirect(url_for('index'))
 
 # ==============================
-# ▶️ Run
+# ▶️ Run App
 # ==============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
