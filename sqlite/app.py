@@ -11,19 +11,18 @@ app = Flask(__name__)
 # ☁️ Cloudinary Config
 # ==============================
 cloudinary.config(
-    cloud_name = os.getenv("CLOUD_NAME"),
-    api_key = os.getenv("API_KEY"),
-    api_secret = os.getenv("API_SECRET")
+    cloud_name=os.getenv("CLOUD_NAME"),
+    api_key=os.getenv("API_KEY"),
+    api_secret=os.getenv("API_SECRET")
 )
 
 # ==============================
-# 🔐 MongoDB Config
+# 🔐 MongoDB Config (SECURE)
 # ==============================
 client = MongoClient("mongodb+srv://vijaysuryawanshi7224_db_user:vijay%402005@cluster0.ckvnjfm.mongodb.net/collegedb?retryWrites=true&w=majority") 
 
 db = client["student_db"]
 collection = db["documents"]
-
 # ==============================
 # 🏠 Home Page
 # ==============================
@@ -48,13 +47,10 @@ def upload():
             resource_type="raw"
         )
 
-        file_url = result['secure_url']
-        public_id = result['public_id']
-
         collection.insert_one({
             "filename": file.filename,
-            "url": file_url,
-            "public_id": public_id
+            "url": result['secure_url'],
+            "public_id": result['public_id']
         })
 
     except Exception as e:
@@ -63,7 +59,7 @@ def upload():
     return redirect(url_for('index'))
 
 # ==============================
-# ❌ Delete File (Cloudinary + DB)
+# ❌ Delete File
 # ==============================
 @app.route('/delete/<id>')
 def delete(id):
@@ -81,8 +77,9 @@ def delete(id):
         return f"Delete failed: {str(e)}"
 
     return redirect(url_for('index'))
+
 # ==============================
-# ▶️ Run App
+# ▶️ Run
 # ==============================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
