@@ -10,7 +10,7 @@ app = Flask(__name__)
 # ==============================
 # ⚡ Security + Limits
 # ==============================
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB limit
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
@@ -29,10 +29,11 @@ cloudinary.config(
 # ==============================
 # 🔐 MongoDB Config
 # ==============================
-client = MongoClient("mongodb+srv://vijaysuryawanshi7224_db_user:vijay%402005@cluster0.ckvnjfm.mongodb.net/collegedb?retryWrites=true&w=majority") 
-
+MONGO_URI = os.getenv("MONGO_URI")
+client = MongoClient(MONGO_URI)
 db = client["student_db"]
 collection = db["documents"]
+
 # ==============================
 # 🏠 Home
 # ==============================
@@ -80,21 +81,17 @@ def upload():
 # ==============================
 @app.route('/delete/<id>')
 def delete(id):
-    try:
-        file = collection.find_one({"_id": ObjectId(id)})
+    file = collection.find_one({"_id": ObjectId(id)})
 
-        if file:
-            resource_type = "raw" if file.get("type") == "pdf" else "image"
+    if file:
+        resource_type = "raw" if file['type'] == "pdf" else "image"
 
-            cloudinary.uploader.destroy(
-                file['public_id'],
-                resource_type=resource_type
-            )
+        cloudinary.uploader.destroy(
+            file['public_id'],
+            resource_type=resource_type
+        )
 
-            collection.delete_one({"_id": ObjectId(id)})
-
-    except Exception as e:
-        return f"Delete failed: {str(e)}"
+        collection.delete_one({"_id": ObjectId(id)})
 
     return redirect(url_for('index'))
 
