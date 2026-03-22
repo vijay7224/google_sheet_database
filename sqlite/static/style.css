@@ -12,11 +12,6 @@ h2 {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 5px 12px rgba(0,0,0,0.1);
-    transition: 0.3s;
-}
-
-.card-box:hover {
-    transform: scale(1.02);
 }
 
 .file-item {
