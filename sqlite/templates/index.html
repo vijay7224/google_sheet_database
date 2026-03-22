@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Document Upload System</title>
+    <title>Cloud Document System</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -23,45 +23,41 @@
 
     <div class="row">
 
-        <!-- Upload Section -->
+        <!-- Upload -->
         <div class="col-md-6">
             <div class="card-box">
-
-                <h5>Upload Document</h5>
-                <p class="text-muted">Upload resume, marksheet etc.</p>
-
+                <h5>Upload File</h5>
                 <form action="/upload" method="POST" enctype="multipart/form-data">
                     <input type="file" name="file" class="form-control mb-3" required>
 
                     <button class="btn btn-primary w-100">
-                        <i class="fas fa-upload"></i> Upload
+                        Upload
                     </button>
                 </form>
-
             </div>
         </div>
 
-        <!-- File List -->
+        <!-- Files -->
         <div class="col-md-6">
             <div class="card-box">
-
-                <h5>Uploaded Files</h5>
+                <h5>Files</h5>
 
                 {% for file in files %}
                 <div class="file-item">
 
-                    <span>{{ file.filename }}</span>
+                    <div>
+                        <strong>{{ file.filename }}</strong><br>
+
+                        {% if file.type == 'pdf' %}
+                            <a href="{{ file.url }}" target="_blank">📄 View PDF</a>
+                        {% else %}
+                            <img src="{{ file.url }}" width="80">
+                        {% endif %}
+                    </div>
 
                     <div>
-                        <!-- View -->
-                        <a href="{{ file.url }}" target="_blank" class="btn btn-success btn-sm">
-                            View
-                        </a>
-
-                        <!-- Delete -->
-                        <a href="/delete/{{ file._id }}" class="btn btn-danger btn-sm">
-                            Delete
-                        </a>
+                        <a href="{{ file.url }}" target="_blank" class="btn btn-success btn-sm">View</a>
+                        <a href="/delete/{{ file._id }}" class="btn btn-danger btn-sm">Delete</a>
                     </div>
 
                 </div>
