@@ -56,7 +56,7 @@ def upload():
         result = cloudinary.uploader.upload(file, resource_type=resource_type)
         collection.insert_one({
             "filename": file.filename,
-            "url": result['secure_url'],   # Use exact Cloudinary URL
+            "url": result['secure_url'],
             "public_id": result['public_id'],
             "type": ext
         })
@@ -66,7 +66,7 @@ def upload():
     return redirect(url_for('index'))
 
 # ------------------------------
-# View File
+# View File (PDF Inline Preview / Image Preview)
 # ------------------------------
 @app.route('/view/<id>')
 def view_file(id):
@@ -88,7 +88,7 @@ def delete(id):
     return redirect(url_for('index'))
 
 # ------------------------------
-# Run App (Render-ready)
+# Run App
 # ------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Render dynamic port
