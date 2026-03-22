@@ -71,14 +71,16 @@ def delete(id):
         file = collection.find_one({"_id": ObjectId(id)})
 
         if file:
-            cloudinary.uploader.destroy(file['public_id'])
+            cloudinary.uploader.destroy(
+                file['public_id'],
+                resource_type="raw"
+            )
             collection.delete_one({"_id": ObjectId(id)})
 
     except Exception as e:
         return f"Delete failed: {str(e)}"
 
     return redirect(url_for('index'))
-
 # ==============================
 # ▶️ Run App
 # ==============================
