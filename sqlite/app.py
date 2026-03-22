@@ -64,7 +64,7 @@ def upload():
 
         file_url = result['secure_url']
 
-        # 🔥 PDF fix: add extension if missing
+        # PDF fix: add extension if missing
         if ext == "pdf" and not file_url.endswith(".pdf"):
             file_url += ".pdf"
 
@@ -79,6 +79,18 @@ def upload():
         return f"Upload failed: {str(e)}"
 
     return redirect(url_for('index'))
+
+# ------------------------------
+# View File (Second Page)
+# ------------------------------
+@app.route('/view/<id>')
+def view_file(id):
+    file = collection.find_one({"_id": ObjectId(id)})
+
+    if not file:
+        return "File not found"
+
+    return render_template("view.html", file=file)
 
 # ------------------------------
 # Delete File
