@@ -29,11 +29,10 @@ cloudinary.config(
 # ==============================
 # 🔐 MongoDB Config
 # ==============================
-MONGO_URI = os.getenv("MONGO_URI")
-client = MongoClient(MONGO_URI)
+client = MongoClient("mongodb+srv://vijaysuryawanshi7224_db_user:vijay%402005@cluster0.ckvnjfm.mongodb.net/collegedb?retryWrites=true&w=majority") 
+
 db = client["student_db"]
 collection = db["documents"]
-
 # ==============================
 # 🏠 Home
 # ==============================
