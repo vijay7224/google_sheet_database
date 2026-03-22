@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <title>Cloud Document System</title>
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap -->
@@ -11,11 +10,9 @@
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
 <div class="container mt-5">
-
     <h2 class="text-center mb-4">☁️ Cloud Document System</h2>
 
     <div class="row">
@@ -24,7 +21,6 @@
         <div class="col-md-6">
             <div class="card-box">
                 <h5>Upload File</h5>
-
                 <form action="/upload" method="POST" enctype="multipart/form-data">
                     <input type="file" name="file" class="form-control mb-3" required>
                     <button class="btn btn-primary w-100">Upload</button>
@@ -39,44 +35,22 @@
 
                 {% for file in files %}
                 <div class="file-item">
-
-                    <!-- Left: Preview -->
                     <div>
                         <strong>{{ file.filename }}</strong><br>
 
                         {% if file.type == 'pdf' %}
-                            <!-- PDF Preview -->
-                            <iframe 
-                                src="{{ file.url }}" 
-                                width="200" 
-                                height="150"
-                                style="border:1px solid #ccc;">
-                            </iframe>
+                            <iframe src="{{ file.url }}" width="200" height="150" style="border:1px solid #ccc;"></iframe>
                         {% else %}
-                            <!-- Image Preview -->
                             <img src="{{ file.url }}" width="80">
                         {% endif %}
                     </div>
 
-                    <!-- Right: Buttons -->
                     <div>
-
-                        {% if file.type == 'pdf' %}
-                            <a href="{{ file.url }}" target="_blank" class="btn btn-success btn-sm">
-                                View PDF
-                            </a>
-                        {% else %}
-                            <a href="{{ file.url }}" target="_blank" class="btn btn-success btn-sm">
-                                View Image
-                            </a>
-                        {% endif %}
-
-                        <a href="/delete/{{ file._id }}" class="btn btn-danger btn-sm">
-                            Delete
+                        <a href="{{ file.url }}" target="_blank" class="btn btn-success btn-sm">
+                            {% if file.type == 'pdf' %} View PDF {% else %} View Image {% endif %}
                         </a>
-
+                        <a href="/delete/{{ file._id }}" class="btn btn-danger btn-sm">Delete</a>
                     </div>
-
                 </div>
                 {% endfor %}
 
@@ -84,7 +58,6 @@
         </div>
 
     </div>
-
 </div>
 
 </body>
