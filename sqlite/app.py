@@ -7,43 +7,42 @@ import os
 
 app = Flask(__name__)
 
-# ==============================
-# ⚡ Security + Limits
-# ==============================
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
-
-ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
+# ------------------------------
+# Allowed file types
+# ------------------------------
+ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# ==============================
-# ☁️ Cloudinary Config
-# ==============================
+# ------------------------------
+# Cloudinary Config
+# ------------------------------
 cloudinary.config(
     cloud_name=os.getenv("CLOUD_NAME"),
     api_key=os.getenv("API_KEY"),
     api_secret=os.getenv("API_SECRET")
 )
 
-# ==============================
-# 🔐 MongoDB Config
-# ==============================
+# ------------------------------
+# MongoDB Config
+# ------------------------------
 client = MongoClient("mongodb+srv://vijaysuryawanshi7224_db_user:vijay%402005@cluster0.ckvnjfm.mongodb.net/collegedb?retryWrites=true&w=majority") 
 
 db = client["student_db"]
 collection = db["documents"]
-# ==============================
-# 🏠 Home
-# ==============================
+
+# ------------------------------
+# Home Page
+# ------------------------------
 @app.route('/')
 def index():
     files = list(collection.find())
     return render_template('index.html', files=files)
 
-# ==============================
-# 📤 Upload
-# ==============================
+# ------------------------------
+# Upload File
+# ------------------------------
 @app.route('/upload', methods=['POST'])
 def upload():
     file = request.files.get('file')
@@ -65,9 +64,9 @@ def upload():
 
         file_url = result['secure_url']
 
-        # 🔥 FIX: add .pdf extension
-        if ext == "pdf":
-            file_url = file_url + ".pdf"
+        # 🔥 PDF fix: add extension if missing
+        if ext == "pdf" and not file_url.endswith(".pdf"):
+            file_url += ".pdf"
 
         collection.insert_one({
             "filename": file.filename,
@@ -81,27 +80,25 @@ def upload():
 
     return redirect(url_for('index'))
 
-# ==============================
-# ❌ Delete
-# ==============================
+# ------------------------------
+# Delete File
+# ------------------------------
 @app.route('/delete/<id>')
 def delete(id):
     file = collection.find_one({"_id": ObjectId(id)})
 
     if file:
         resource_type = "raw" if file['type'] == "pdf" else "image"
-
         cloudinary.uploader.destroy(
             file['public_id'],
             resource_type=resource_type
         )
-
         collection.delete_one({"_id": ObjectId(id)})
 
     return redirect(url_for('index'))
 
-# ==============================
-# ▶️ Run
-# ==============================
+# ------------------------------
+# Run App
+# ------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
