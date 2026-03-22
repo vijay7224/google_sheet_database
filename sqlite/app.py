@@ -64,9 +64,15 @@ def upload():
             resource_type=resource_type
         )
 
+        file_url = result['secure_url']
+
+        # 🔥 FIX: add .pdf extension
+        if ext == "pdf":
+            file_url = file_url + ".pdf"
+
         collection.insert_one({
             "filename": file.filename,
-            "url": result['secure_url'],
+            "url": file_url,
             "public_id": result['public_id'],
             "type": ext
         })
