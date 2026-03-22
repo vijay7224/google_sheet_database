@@ -1,6 +1,6 @@
 body {
-    background: #f5f7fa;
-    font-family: Arial, sans-serif;
+    background: #f4f7fa;
+    font-family: Arial;
 }
 
 h2 {
@@ -11,7 +11,7 @@ h2 {
     background: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 12px rgba(0,0,0,0.1);
     transition: 0.3s;
 }
 
@@ -23,12 +23,8 @@ h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #f1f1f1;
+    background: #eef2f5;
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 10px;
-}
-
-.file-item span {
-    font-size: 14px;
 }
